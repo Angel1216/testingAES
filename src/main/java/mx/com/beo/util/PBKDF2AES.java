@@ -33,10 +33,10 @@ public class PBKDF2AES {
      * @return la cadena encriptada con AES en base64.
      * @throws si la encriptación falla.
      */
-	public String encrypt(String clearText) throws Exception{
+public String encrypt(String clearText) throws Exception{
 		
 		// LLave secreta para encryptar
-		String EncryptionKey = "s3gur1d@dbuf3t3d3@s3s0r3s3ns1st3m@s";
+		String EncryptionKey = "1M4lYza2hlrEEhoQv2xGMQ5v+wyeGUhCfiQsIqqGSdc=";
         
 		// Se obtiene los arreglos de bytes de la cadena original y la palabra clave
 		byte[] clearBytes = clearText.getBytes(StandardCharsets.UTF_16LE);
@@ -58,13 +58,11 @@ public class PBKDF2AES {
         cryptoStream.write(clearBytes);
         cryptoStream.close();
         
-        
-        //String base64_RFC3548 = BaseEncoding.base64().encode("".getBytes(Charsets.US_ASCII));
-        String base64_JavaUtil = Base64.getEncoder().encodeToString( memoryStream.toByteArray() ); 
-        
         // Se retorna el texto encriptado convertido a Base64
-        return base64_JavaUtil;
+        return Base64.getEncoder().encodeToString( memoryStream.toByteArray() );
 
     }
+
+
 
 }

@@ -8,6 +8,9 @@ import javax.crypto.spec.SecretKeySpec;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 
@@ -15,6 +18,7 @@ import com.google.common.io.BaseEncoding;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.SystemPropertyUtils;
 
  
 /**
@@ -50,20 +54,77 @@ public class AESCBC128bits {
      * @return el texto cifrado en modo String
      * @throws Exception puede devolver excepciones de los siguientes tipos: NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException
      */
-    public static String encrypt(String key, String iv, String cleartext) throws Exception {
+    public static String encrypt(String key, String cleartext) throws Exception {
+    	
+    		byte[] byteskey = key.getBytes(StandardCharsets.US_ASCII);
+    		Rfc2898DeriveBytesAES pdb = new Rfc2898DeriveBytesAES(key, byteskey);
+//    	
+//    		byte[] bytesIv = iv.getBytes(StandardCharsets.US_ASCII);
+//    		Rfc2898DeriveBytesAES pdbIv = new Rfc2898DeriveBytesAES(iv, bytesIv);
+    		
+//    		byte[] clearBytes = cleartext.getBytes(StandardCharsets.US_ASCII);
+    		
+  
+    	System.out.println("key: " + key);
+    	System.out.println("cleartext: " + cleartext);
+    	
+    	byte[] p1_Key = new byte[16];
+        byte[] p2_IV = new byte[16];
+        
+    	byte[] numArray =  decodeBase64(key);
+    	System.out.println("numArray: " + new String(numArray));
+    	
+    	
+        int index1 = 0;
+        int index2 = 0;
+        System.out.println("numArray.length: " + numArray.length);
+        for (byte num : numArray)
+        {
+          if (index1 < 16)
+          {
+            p1_Key[index1] = num;
+          }
+          else
+          {
+            p2_IV[index2] = num;
+            ++index2;
+          }
+          ++index1;
+        }
+        
+        
+//        System.out.println("-------------------------------------------------");
+//        
+//        System.out.println("p1_Key: " + BaseEncoding.base64().encode(p1_Key));
+//        System.out.println("p2_IV:  " + BaseEncoding.base64().encode(p2_IV));
+//        System.out.println("TestBase64 (PlanetATierra): " + BaseEncoding.base64().encode("PlanetATierra".getBytes()));
+//        
+//        System.out.println("-------------------------------------------------");
+        
+    	
             Cipher cipher = Cipher.getInstance(cI);
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(), alg);
-            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes());
+            
+            
+//            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(), alg);
+//            SecretKeySpec skeySpec = new SecretKeySpec(pdb.getBytes(32), alg);
+            SecretKeySpec skeySpec = new SecretKeySpec(p1_Key, alg);
+            
+//            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes());
+//            IvParameterSpec ivParameterSpec = new IvParameterSpec(pdbIv.getBytes(16));
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(p2_IV);
+            
+    		
+            
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivParameterSpec);
             byte[] encrypted = cipher.doFinal(cleartext.getBytes());
             
-            String base64_apache = new String(encodeBase64(encrypted));
+            //String base64_apache = new String(encodeBase64(encrypted));
             String base64_RFC3548 = BaseEncoding.base64().encode(encrypted); // .getBytes(Charsets.US_ASCII)
             
-            LOGGER.info("base64_apache:  " + base64_apache);
-            LOGGER.info("base64_RFC3548: " + base64_RFC3548);
+//            LOGGER.info("base64_apache:  " + base64_apache);
+//            LOGGER.info("base64_RFC3548: " + base64_RFC3548);
             
-            return base64_apache;
+            return base64_RFC3548;
     }
  
     /**
@@ -75,14 +136,24 @@ public class AESCBC128bits {
      * @return el texto desencriptado en modo String
      * @throws Exception puede devolver excepciones de los siguientes tipos: NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException
      */
-    public static String decrypt(String key, String iv, String encrypted) throws Exception {
+    /*
+    public static String decrypt(String key, String encrypted) throws Exception {
+    	
+//    	byte[] byteskey = key.getBytes(StandardCharsets.US_ASCII);
+//		Rfc2898DeriveBytesAES pdb = new Rfc2898DeriveBytesAES(key, byteskey);
+//	
+//		byte[] bytesIv = iv.getBytes(StandardCharsets.US_ASCII);
+//		Rfc2898DeriveBytesAES pdbIv = new Rfc2898DeriveBytesAES(iv, bytesIv);
+		
             Cipher cipher = Cipher.getInstance(cI);
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(), alg);
-            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes());
+//            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(), alg);
+//SecretKeySpec skeySpec = new SecretKeySpec(pdb.getBytes(32), alg);
+//            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes());
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(pdbIv.getBytes(16));
             byte[] enc = decodeBase64(encrypted);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivParameterSpec);
             byte[] decrypted = cipher.doFinal(enc);
             return new String(decrypted);
     }
- 
+*/
 }

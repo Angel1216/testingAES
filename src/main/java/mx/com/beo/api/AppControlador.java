@@ -75,34 +75,37 @@ public class AppControlador {
 //			append(mapBody.get("numeroCuentaBeneficiario")).append("|").
 //			append(mapBody.get("montoOperacion"));
 			
-			cadenaOriginal.append("20140421|T|TR-CEL-2635|40012|40044|5516243692|16.55");
+			cadenaOriginal.append("20170912|A|4310163|40132|Angel|002528095301162365|23.50");
 			
-			LOGGER.info("cadenaOriginal  : " + cadenaOriginal);
+			//LOGGER.info("cadenaOriginal                      : " + cadenaOriginal);
 			
-			// Encriptar
-			cadenaCifrada = PBKDF2AES_128.encrypt(cadenaOriginal.toString());
-			cadenaSanitizada = sanitizacion.sanitizacion(cadenaCifrada);
+//			// Encriptar
+//			cadenaCifrada = PBKDF2AES_128.encrypt(cadenaOriginal.toString());
+//			cadenaSanitizada = sanitizacion.sanitizacion(cadenaCifrada);
 			
-			LOGGER.info("cadenaCifrada   : " + cadenaCifrada);
-			LOGGER.info("cadenaSanitizada: " + cadenaSanitizada);
-			
+			//LOGGER.info("cadenaCifrada (Fondos)              : " + cadenaCifrada);
+			//LOGGER.info("cadenaSanitizada (Fondos)           : " + cadenaSanitizada);
 			
 			
 			// Encriptar AES CBC 128 bits
-			String key = "92AE31A79FEEB2A3"; //llave
-			String iv = "0123456789ABCDEF"; // vector de inicialización
+			String key = "1M4lYza2hlrEEhoQv2xGMQ5v+wyeGUhCfiQsIqqGSdc=";
+			
+			cadenaCifrada = AESCBC128bits.encrypt(key, cadenaOriginal.toString());
+			cadenaSanitizada = sanitizacion.sanitizacion(cadenaCifrada);
+//			String desEncriptado = AESCBC128bits.decrypt(key, encriptado.toString());
 
-			LOGGER.info("Texto encriptado   : "+AESCBC128bits.encrypt(key, iv,cadenaOriginal.toString()));
-			//LOGGER.info("Texto desencriptado: "+AESCBC128bits.decrypt(key, iv,AESCBC128bits.encrypt(key, iv,cadenaOriginal.toString())));
-			LOGGER.info("Texto Sanitizada   : "+sanitizacion.sanitizacion(AESCBC128bits.encrypt(key, iv,cadenaOriginal.toString())));
+			LOGGER.info("Texto encriptado (AESCBC128bits)    : " + cadenaCifrada);
+			LOGGER.info("Texto Sanitizada (AESCBC128bits)    : " + cadenaSanitizada);
+//			LOGGER.info("Texto desencriptado (AESCBC128bits) : " + desEncriptado);
 			
 			
 			
-			responseEncryption.put("encryption", cadenaCifrada);
+			responseEncryption.put("encryption", cadenaSanitizada);
 			responseEncryption.put("responseStatus", 200);
 			responseEncryption.put("responseError", "");
 		} catch (Exception exception) {
 			LOGGER.error(exception.getMessage());
+			exception.printStackTrace();
 			responseError = new HashMap<String, Object>();
 			responseError.put("responseStatus", 500);
 			responseError.put("responseError", exception.getMessage());
